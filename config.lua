@@ -21,6 +21,16 @@ Config.Blip = {
   radiusAlpha = 90,
 }
 
+Config.PlayerBlips = {
+  enabled = true,
+  refreshMs = 5000,
+  sprite = 1,
+  colour = 1,
+  scale = 0.7,
+  shortRange = false,
+  showSelf = false,
+}
+
 Config.Marker = {
   enabled = true,
   type = 1,

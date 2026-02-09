@@ -3,11 +3,12 @@ local centerBlip, radiusBlip = nil, nil
 
 local inZone = false
 local streak = 0
-local total = 0
 local vip = false
 
 local adminToken = nil
 local top = {}
+
+local playerBlips = {}
 
 local function sNow() return os.time() end
 
@@ -21,6 +22,15 @@ end
 local function clearBlips()
   if centerBlip then RemoveBlip(centerBlip) centerBlip = nil end
   if radiusBlip then RemoveBlip(radiusBlip) radiusBlip = nil end
+end
+
+local function clearPlayerBlips()
+  for _, b in pairs(playerBlips) do
+    if b and DoesBlipExist(b) then
+      RemoveBlip(b)
+    end
+  end
+  playerBlips = {}
 end
 
 local function setBlips(z)
@@ -77,7 +87,7 @@ local function hudText()
 
   if Config.HUD.showTop and top and #top > 0 then
     local c = math.min(#top, Config.HUD.topCount or 3)
-    lines[#lines +[#lines + 1] = 'Top streak:'
+    lines[#lines + 1] = 'Top streak:'
     for i = 1, c do
       lines[#lines + 1] = ('%d) %s - %ds'):format(i, top[i].name or '—', top[i].streak or 0)
     end
@@ -105,10 +115,7 @@ local function fetchState()
   present = data.present or 0
   adminToken = data.adminToken or adminToken
   vip = data.vip == true
-
   streak = (data.stats and data.stats.streak) or streak
-  total = (data.stats and data.stats.total) or total
-
   setBlips(zone)
 end
 
@@ -119,6 +126,7 @@ RegisterNetEvent('Sync:KOTH:ZoneChanged', function(z, rAt, p, c, pr)
   contested = c == true
   present = pr or 0
   setBlips(zone)
+  clearPlayerBlips()
 
   lib.notify({
     title = 'KOTH',
@@ -171,6 +179,63 @@ RegisterNetEvent('Sync:KOTH:RewardFail', function()
     type = 'error',
     position = 'top',
   })
+end)
+
+RegisterNetEvent('Sync:KOTH:PlayerBlips', function(ids)
+  if not (Config.PlayerBlips and Config.PlayerBlips.enabled == true) then return end
+  if not zone then
+    clearPlayerBlips()
+    return
+  end
+
+  local me = GetPlayerServerId(PlayerId())
+  local allowSelf = Config.PlayerBlips.showSelf == true
+
+  local wanted = {}
+  for i = 1, #ids do
+    local sid = ids[i]
+    if allowSelf or sid ~= me then
+      wanted[sid] = true
+    end
+  end
+
+  for sid, bl in pairs(playerBlips) do
+    if not wanted[sid] then
+      if bl and DoesBlipExist(bl) then RemoveBlip(bl) end
+      playerBlips[sid] = nil
+    end
+  end
+
+  for sid in pairs(wanted) do
+    if not playerBlips[sid] then
+      local ply = GetPlayerFromServerId(sid)
+      if ply ~= -1 then
+        local ped = GetPlayerPed(ply)
+        if ped and ped ~= 0 then
+          local blip = AddBlipForEntity(ped)
+          SetBlipSprite(blip, Config.PlayerBlips.sprite or 1)
+          SetBlipColour(blip, Config.PlayerBlips.colour or 1)
+          SetBlipScale(blip, Config.PlayerBlips.scale or 0.7)
+          SetBlipAsShortRange(blip, Config.PlayerBlips.shortRange == true)
+          ShowHeadingIndicatorOnBlip(blip, true)
+          playerBlips[sid] = blip
+        end
+      end
+    else
+      local blip = playerBlips[sid]
+      local ply = GetPlayerFromServerId(sid)
+      if ply == -1 then
+        if blip and DoesBlipExist(blip) then RemoveBlip(blip) end
+        playerBlips[sid] = nil
+      else
+        local ped = GetPlayerPed(ply)
+        if not ped or ped == 0 then
+          if blip and DoesBlipExist(blip) then RemoveBlip(blip) end
+          playerBlips[sid] = nil
+        end
+      end
+    end
+  end
 end)
 
 local function adminAction(action, data)
@@ -323,5 +388,6 @@ end)
 AddEventHandler('onResourceStop', function(res)
   if res ~= GetCurrentResourceName() then return end
   clearBlips()
+  clearPlayerBlips()
   lib.hideTextUI()
 end)

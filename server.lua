@@ -17,7 +17,7 @@ local function clamp(x, a, b)
   return x
 end
 
-local D = (SVConfig and SVConfig.Discord) or { enabled = false }
+local D = (KOTH_Server and KOTH_Server.Discord) or { enabled = false }
 
 local function mentionRole()
   if not D.mention_role_id or D.mention_role_id == '' then return '' end
@@ -616,14 +616,12 @@ CreateThread(function()
   local loopMs = tonumber(Config.Tick.loopMs or 500) or 500
   if loopMs < 250 then loopMs = 250 end
 
-  local inZoneMinMs = tonumber(Config.Tick.inZoneMinMs or 700) or 700
-  if inZoneMinMs < loopMs then inZoneMinMs = loopMs end
-
   local tele2 = (tonumber(Config.Security.teleportDist or 250.0) or 250.0) ^ 2
   local teleWin = tonumber(Config.Security.teleportWindowMs or 2000) or 2000
 
   local lastStatusAt = 0
-  local statusEvery = 5000
+  local statusEvery = tonumber(Config.PlayerBlips and Config.PlayerBlips.refreshMs or 5000) or 5000
+  if statusEvery < 2000 then statusEvery = 2000 end
 
   while true do
     Wait(loopMs)
@@ -760,6 +758,14 @@ CreateThread(function()
     if (nowMs - lastStatusAt) >= statusEvery then
       lastStatusAt = nowMs
       sendStatus(-1, getTopStreaks(Config.HUD.topCount or 3))
+
+      if Config.PlayerBlips and Config.PlayerBlips.enabled == true then
+        local ids = {}
+        for i = 1, #insideList do
+          ids[#ids + 1] = insideList[i]
+        end
+        TriggerClientEvent('Sync:KOTH:PlayerBlips', -1, ids)
+      end
     end
 
     ::continue::
