@@ -6,7 +6,7 @@ Config.TickSeconds = 2
 Config.HoldSeconds = 10 * 60
 Config.RewardCoins = 300
 
-Config.CoinItem = 'koth_coin'
+Config.CoinItem = 'vip'
 
 Config.Blip = {
   enabled = true,
