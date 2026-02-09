@@ -1,12 +1,16 @@
 Config = {}
 
 Config.RotateMinutes = 30
-Config.TickSeconds = 2
-
-Config.HoldSeconds = 10 * 60
+Config.HoldSeconds = 600
 Config.RewardCoins = 300
-
 Config.CoinItem = 'vip'
+
+Config.VIP = {
+  enabled = true,
+  progressFactor = 0.80,
+  rewardBonus = 0.20,
+  refreshEverySeconds = 60,
+}
 
 Config.Blip = {
   enabled = true,
@@ -21,10 +25,60 @@ Config.Marker = {
   enabled = true,
   type = 1,
   scale = vec3(2.0, 2.0, 1.0),
+  drawDistance = 80.0,
   bobUpAndDown = false,
   faceCamera = true,
   rotate = false,
-  drawDistance = 80.0,
+}
+
+Config.Tick = {
+  loopMs = 500,
+  inZoneMinMs = 700,
+}
+
+Config.Sweep = {
+  everyMs = 8000,
+  nearDist = 900.0,
+  hardFarDist = 2500.0,
+}
+
+Config.DB = {
+  flushEveryMs = 60000,
+  flushDirtyAtSeconds = 45,
+}
+
+Config.Contested = {
+  enabled = true,
+  minPresent = 2,
+  mode = 'players',
+  contestedStopsProgress = true,
+}
+
+Config.RewardScaling = {
+  enabled = true,
+  startAt = 8,
+  minFactor = 0.40,
+}
+
+Config.AdminGroups = {
+  admin = true,
+  god = true,
+  superadmin = true,
+}
+
+Config.Security = {
+  teleportDist = 250.0,
+  teleportWindowMs = 2000,
+  adminBlockSeconds = 120,
+  adminTokenTtlSeconds = 300,
+  adminTokenRotateSeconds = 120,
+}
+
+Config.HUD = {
+  enabled = true,
+  refreshMs = 350,
+  showTop = true,
+  topCount = 3,
 }
 
 Config.Zones = {
