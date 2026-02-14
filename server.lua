@@ -1,7 +1,9 @@
 local ESX = exports["es_extended"]:getSharedObject()
 
 local function ms() return GetGameTimer() end
-local function sNow() return os.time() end
+local function sNow()
+  return GetCloudTimeAsInt()
+end
 local function v3(x) return vector3(x.x, x.y, x.z) end
 
 local function dist2(a, b)
